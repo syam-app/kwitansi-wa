@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kwitansi Whatsapp</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  </head>
+  <style>
+    .kwitansi {
+      max-width: 440px;
+      margin: 0 auto;
+    }
+    img {
+        width: 100%;
+        height: auto;
+    }
+    body {
+        margin: 0 auto;
+        max-width: 520px;
+    }
+  </style>
+  <body>
+        <section>
+    <div class="m-4 p-2 rounded bg-success text-center">
+        <div class="text-white row mx-1" style="font-size: 12px;">
+            <div id="tanggal" class="col-8 text-start fst-italic"></div>
+            <div id="jam" class="col-4 text-end fst-italic"></div>
+        </div>
+        <div id="textJalan" style="font-size: 14px;" class="my-1 mx-3 bg-white rounded">
+            <span id="textContent"></span><span id="cursor">_</span>
+        </div>
+    </div>
+    </section>
+    <script>
+       // Fungsi untuk mendapatkan waktu sekarang
+function updateDateTime() {
+    const tanggalElement = document.getElementById('tanggal');
+    const jamElement = document.getElementById('jam');
+
+    // Membuat objek tanggal saat ini
+    const now = new Date();
+
+    // Format tanggal (contoh: Selasa, 24 Desember 2024)
+    const hari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    const bulan = [
+        'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+    const tanggal = `${hari[now.getDay()]}, ${now.getDate()} ${bulan[now.getMonth()]} ${now.getFullYear()}`;
+
+    // Format waktu (contoh: 22.30 WIB)
+    const jam = now.getHours().toString().padStart(2, '0');
+    const menit = now.getMinutes().toString().padStart(2, '0');
+    const waktu = `${jam}.${menit} WIB`;
+
+    // Menampilkan tanggal dan jam ke elemen HTML
+    tanggalElement.textContent = tanggal;
+    jamElement.textContent = waktu;
+}
+
+function runText() {
+    const textElement = document.getElementById('textContent');
+    const texts = ['Uripku namung', 'Mangan', 'Turu', 'Ngibadah', 'Nakara']; // Daftar teks
+    let textIndex = 0;
+    let charIndex = 0;
+    let isTyping = true; // Menandai apakah sedang mengetik atau menghapus
+
+    function updateText() {
+        if (isTyping) {
+            // Menambahkan karakter satu per satu
+            charIndex++;
+            textElement.textContent = texts[textIndex].slice(0, charIndex);
+
+            // Jika selesai mengetik, ubah mode ke menghapus setelah jeda
+            if (charIndex === texts[textIndex].length) {
+                isTyping = false;
+                setTimeout(updateText, 2000); // Jeda sebelum mulai menghapus
+                return;
+            }
+        } else {
+            // Menghapus karakter satu per satu
+            charIndex--;
+            textElement.textContent = texts[textIndex].slice(0, charIndex);
+
+            // Jika selesai menghapus, ubah mode ke mengetik teks berikutnya
+            if (charIndex === 0) {
+                isTyping = true;
+                textIndex = (textIndex + 1) % texts.length; // Pindah ke teks berikutnya
+            }
+        }
+
+        // Interval untuk update teks
+        setTimeout(updateText, isTyping ? 100 : 50); // Kecepatan mengetik lebih lambat daripada menghapus
+    }
+
+    // Memulai proses update teks
+    updateText();
+}
+
+
+// Menjalankan fungsi ketika halaman dimuat
+document.addEventListener('DOMContentLoaded', () => {
+    updateDateTime();
+    setInterval(updateDateTime, 60000); // Update jam setiap 1 menit
+    runText();
+});
+
+    </script>
+    <div class="kwitansi">
+      <!-- <div class="mt-4 headerform text-center fw-bold h4 text-success">Kwitansi WhatsApp</div>
+      <div style="margin-top: -7px; font-size: 17px;" class="subheader text-center">Bharata Internasional</div> -->
+      <form id="orderForm" class="px-3">
+        <div class="mb-2 mt-3">
+          <label for="namaobat" class="fw-bold">Nama Obat</label>
+          <select class="form-control" id="namaobat">
+            <option value="" data-harga="0">Pilih Obat</option>
+          </select>
+        </div>
+        
+        <div id="selectedObatList" class="mb-3"></div>
+
+        <div class="mb-2">
+          <label for="ongkir" class="fw-bold">Ongkir</label>
+          <input type="number" class="form-control" id="ongkir">
+        </div>
+        <div class="mb-2">
+          <label for="diskonobat" class="fw-bold">Diskon Obat</label>
+          <input type="number" class="form-control" id="diskonobat">
+        </div>
+        <div class="mb-2">
+          <label for="diskonongkir" class="fw-bold">Diskon Ongkir</label>
+          <input type="number" class="form-control" id="diskonongkir">
+        </div>
+        <div class="summary-total bg-light p-3 rounded my-3">
+          <h5>Ringkasan Total</h5>
+          <p id="summary">Subtotal: Rp 0</p>
+        </div>
+        <div class="text-center mb-2">
+          <button id="tombolKirim" type="submit" class="btn btn-success"><i class="bi bi-whatsapp"></i> Kirim Subtotal</button>
+        </div>
+      </form>
+      <div style="font-size: 13px; font-style: italic; margin-top: 40px; text-align: center; color: rgb(128, 128, 128);">Made with <i style="color: rgb(255, 109, 109);" class="bi bi-heart-fill"></i> By. Hisyam Aziz</div>
+    </div>
+
+    <script>
+      // Data obat
+      const dataObat = [
+        { namaobat: "Xerdiove Nakara", harga: 269000 },
+        { namaobat: "Regnazel Nakara", harga: 269000 },
+      ];
+
+      
+      const selectObat = document.getElementById("namaobat");
+      dataObat.forEach((obat) => {
+        const option = document.createElement("option");
+        option.value = obat.namaobat;
+        option.textContent = obat.namaobat;
+        option.setAttribute("data-harga", obat.harga);
+        selectObat.appendChild(option);
+      });
+
+      const selectedObatData = {};
+
+      selectObat.addEventListener("change", function () {
+        const selectedOption = selectObat.options[selectObat.selectedIndex];
+        const namaobat = selectedOption.value;
+        const harga = parseInt(selectedOption.getAttribute("data-harga"), 10);
+
+        if (!namaobat) return; 
+
+        if (selectedObatData[namaobat]) {
+          selectedObatData[namaobat].quantity++;
+        } else {
+          selectedObatData[namaobat] = { harga, quantity: 1 };
+        }
+
+        updateSelectedObatList();
+        updateSubtotal(); 
+      });
+
+      function updateSelectedObatList() {
+        const selectedObatList = document.getElementById("selectedObatList");
+        selectedObatList.innerHTML = ""; 
+
+        for (const [namaobat, data] of Object.entries(selectedObatData)) {
+          const { harga, quantity } = data;
+
+          const obatDiv = document.createElement("div");
+          obatDiv.className = "d-flex align-items-center mb-2";
+
+          const obatName = document.createElement("span");
+          obatName.className = "me-3 fw-bold";
+          obatName.textContent = namaobat;
+
+          const decreaseBtn = document.createElement("button");
+          decreaseBtn.className = "btn btn-outline-secondary btn-sm me-2";
+          decreaseBtn.textContent = "-";
+          decreaseBtn.addEventListener("click", () => {
+            if (quantity > 1) {
+              selectedObatData[namaobat].quantity--;
+            } else {
+              delete selectedObatData[namaobat];
+            }
+            updateSelectedObatList();
+            updateSubtotal(); 
+          });
+
+          const quantityInput = document.createElement("input");
+          quantityInput.type = "number";
+          quantityInput.className = "form-control mx-2 text-center";
+          quantityInput.value = quantity;
+          quantityInput.min = 1;
+          quantityInput.style.width = "50px";
+          quantityInput.readOnly = true;
+
+          const increaseBtn = document.createElement("button");
+          increaseBtn.className = "btn btn-outline-secondary btn-sm ms-2";
+          increaseBtn.textContent = "+";
+          increaseBtn.addEventListener("click", () => {
+            selectedObatData[namaobat].quantity++;
+            updateSelectedObatList();
+            updateSubtotal(); 
+          });
+
+          obatDiv.appendChild(obatName);
+          obatDiv.appendChild(decreaseBtn);
+          obatDiv.appendChild(quantityInput);
+          obatDiv.appendChild(increaseBtn);
+
+          selectedObatList.appendChild(obatDiv);
+        }
+      }
+
+      function updateSubtotal() {
+        const ongkir = parseInt(document.getElementById("ongkir").value || 0, 10);
+        const diskonobat = parseInt(document.getElementById("diskonobat").value || 0, 10);
+        const diskonongkir = parseInt(document.getElementById("diskonongkir").value || 0, 10);
+
+        let subtotal = 0;
+
+        for (const { harga, quantity } of Object.values(selectedObatData)) {
+          subtotal += harga * quantity;
+        }
+
+        subtotal += ongkir - diskonobat - diskonongkir;
+
+        document.getElementById("summary").textContent = `Subtotal: Rp ${subtotal.toLocaleString()}`;
+      }
+
+      document.getElementById("ongkir").addEventListener("input", updateSubtotal);
+      document.getElementById("diskonobat").addEventListener("input", updateSubtotal);
+      document.getElementById("diskonongkir").addEventListener("input", updateSubtotal);
+
+      function sendWhatsAppMessage() {
+        let pesan = "*📦 Ringkasan Pesanan*\n-----------------------------------------------\n";
+
+        let totalObat = 0;
+        for (const [namaobat, data] of Object.entries(selectedObatData)) {
+            const { harga, quantity } = data;
+            const subtotalObat = harga * quantity;
+            totalObat += subtotalObat;
+            pesan += `*${namaobat}* x ${quantity}\n- Harga : Rp ${subtotalObat.toLocaleString()}\n\n`;
+        }
+
+        pesan += "-----------------------------------------------\n";
+        pesan += `*Rincian Tagihan*\n\n`;
+        pesan += `- Subtotal Obat   : Rp ${totalObat.toLocaleString()}\n`;
+
+        // Detail lainnya
+        const ongkir = parseInt(document.getElementById("ongkir").value || 0, 10);
+        const diskonobat = parseInt(document.getElementById("diskonobat").value || 0, 10);
+        const diskonongkir = parseInt(document.getElementById("diskonongkir").value || 0, 10);
+        const andaHemat = diskonobat + diskonongkir;
+        const totalPesanan = totalObat + ongkir - diskonobat - diskonongkir;
+
+        pesan += `- Ongkir               : Rp ${ongkir.toLocaleString()}\n`;
+        pesan += `- _Diskon Obat_      : ~Rp ${diskonobat.toLocaleString()}~\n`;
+        pesan += `- _Diskon Ongkir_   : ~Rp ${diskonongkir.toLocaleString()}~\n\n`;
+        pesan += `> Anda hemat Rp ${andaHemat.toLocaleString()}\n`;
+        pesan += "-----------------------------------------------\n";
+        pesan += `*💵 Total Tagihan : Rp ${totalPesanan.toLocaleString()}*`;
+
+        const urlWhatsApp = `https://wa.me/?text=${encodeURIComponent(pesan)}`;
+
+        window.open(urlWhatsApp, "_blank");
+    }
+
+    document.getElementById("tombolKirim").addEventListener("click", function (event) {
+        event.preventDefault();
+        sendWhatsAppMessage();
+    });
+
+    </script>
+    <div id="previewNota" class="mt-4 p-3 bg-white rounded shadow" style="display: none;">
+  <h5 class="text-center fw-bold">Nota Pembelian</h5>
+  <hr>
+  <div id="notaContent"></div>
+  <hr>
+  <div class="text-center">
+    <button id="btnPrint" class="btn btn-primary">Print Nota</button>
+  </div>
+</div>
+
+<script>
+  function updatePreviewNota() {
+    const previewNota = document.getElementById("previewNota");
+    const notaContent = document.getElementById("notaContent");
+
+    let previewHtml = "<p><strong>📦 Ringkasan Pesanan</strong></p>";
+
+    let totalObat = 0;
+    for (const [namaobat, data] of Object.entries(selectedObatData)) {
+      const { harga, quantity } = data;
+      const subtotalObat = harga * quantity;
+      totalObat += subtotalObat;
+      previewHtml += `<p>${namaobat} x ${quantity} <br>Harga: Rp ${subtotalObat.toLocaleString()}</p>`;
+    }
+
+    const ongkir = parseInt(document.getElementById("ongkir").value || 0, 10);
+    const diskonobat = parseInt(document.getElementById("diskonobat").value || 0, 10);
+    const diskonongkir = parseInt(document.getElementById("diskonongkir").value || 0, 10);
+    const andaHemat = diskonobat + diskonongkir;
+    const totalPesanan = totalObat + ongkir - diskonobat - diskonongkir;
+
+    previewHtml += `
+      <hr>
+      <p><strong>Rincian Tagihan</strong></p>
+      <p>Subtotal Obat: Rp ${totalObat.toLocaleString()}</p>
+      <p>Ongkir: Rp ${ongkir.toLocaleString()}</p>
+      <p>Diskon Obat: ~Rp ${diskonobat.toLocaleString()}~</p>
+      <p>Diskon Ongkir: ~Rp ${diskonongkir.toLocaleString()}~</p>
+      <p><strong>Total Tagihan: Rp ${totalPesanan.toLocaleString()}</strong></p>
+      <p><em>Anda hemat Rp ${andaHemat.toLocaleString()}</em></p>
+    `;
+
+    notaContent.innerHTML = previewHtml;
+    previewNota.style.display = "block";
+  }
+
+  // Event listeners to update preview nota on input changes
+  document.getElementById("ongkir").addEventListener("input", updatePreviewNota);
+  document.getElementById("diskonobat").addEventListener("input", updatePreviewNota);
+  document.getElementById("diskonongkir").addEventListener("input", updatePreviewNota);
+  selectObat.addEventListener("change", updatePreviewNota);
+
+  document.getElementById("btnPrint").addEventListener("click", function () {
+    const printWindow = window.open("", "_blank");
+    const notaHTML = document.getElementById("previewNota").innerHTML;
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Print Nota</title>
+          <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        </head>
+        <body class="p-3">
+          <div class="nota-content">
+            ${notaHTML}
+          </div>
+        </body>
+      </html>
+    `);
+
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+  });
+</script>
+
+  </body>
+</html>
