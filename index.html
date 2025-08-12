@@ -254,7 +254,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById("diskonongkir").addEventListener("input", updateSubtotal);
 
       function sendWhatsAppMessage() {
-        let pesan = "*📦 Ringkasan Pesanan*\n-----------------------------------------------\n";
+        let pesan = "*Ringkasan Pesanan*\n-----------------------------------------------\n";
 
         let totalObat = 0;
         for (const [namaobat, data] of Object.entries(selectedObatData)) {
@@ -280,7 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
         pesan += `- _Diskon Ongkir_   : ~Rp ${diskonongkir.toLocaleString()}~\n\n`;
         pesan += `> Anda hemat Rp ${andaHemat.toLocaleString()}\n`;
         pesan += "-----------------------------------------------\n";
-        pesan += `*💵 Total Tagihan : Rp ${totalPesanan.toLocaleString()}*`;
+        pesan += `*Total Tagihan COD : Rp ${totalPesanan.toLocaleString()}*`;
 
         const urlWhatsApp = `https://wa.me/?text=${encodeURIComponent(pesan)}`;
 
